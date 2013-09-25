@@ -1,0 +1,13 @@
+{
+    "name": "schmunk42/access",
+    "description": "Yii Framework Active Record access check implementation",
+    "authors": [
+        {
+            "name": "Tobias Munk",
+            "email": "schmunk@usrbin.de"
+        }
+    ],
+    "require": {
+
+    }
+}
