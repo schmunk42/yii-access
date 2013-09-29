@@ -10,8 +10,9 @@ class PhAccessBehavior extends CActiveRecordBehavior
     const SUPERUSER_ROLE = 'Superuser';
 
     /**
-     * Name of the internal meta data (parent-)child relation, set to `null` if a record should be automatically created
-     * with the current application language in its meta data
+     * Name of the internal (parent-)child relation
+     * set to `!` if a record should be automatically created
+     * with the current application language
      * @var type
      */
     public $defaultDomain = self::ALL_DOMAINS;
@@ -38,7 +39,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function appendable()
     {
-        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('checkAccessCreate'));
+        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('access_append'));
         return $this->Owner;
     }
 
@@ -48,7 +49,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function readable()
     {
-        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('checkAccessRead'));
+        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('access_read'));
         return $this->Owner;
     }
 
@@ -58,7 +59,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function updateable()
     {
-        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('checkAccessUpdate'));
+        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('access_update'));
         return $this->Owner;
     }
 
@@ -68,7 +69,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function deleteable()
     {
-        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('checkAccessDelete'));
+        $this->Owner->getDbCriteria()->mergeWith($this->createAccessCriteria('access_delete'));
         return $this->Owner;
     }
 
@@ -137,7 +138,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Checks permissions in attribute checkAccessDelete and saves meta-data model for afterDelete
+     * Checks if the user has delete permissions for the current record
      *
      * @param type $event
      *
@@ -155,7 +156,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Deletes meta data record
+     * Sets cache entries
      *
      * @param type $event
      *
@@ -171,7 +172,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Checks permissions in attribute checkAccessUpdate
+     * Checks if the user has update permissions for the current record
      *
      * @param type $event
      *
@@ -216,7 +217,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
             $this->owner->access_domain = $this->defaultDomain;
         }
 
-        // create new meta data record or just update modifiedBy/At columns
+        // TODO create new record or just update modifiedBy/At columns
         /*if ($this->owner->isNewRecord) {
             $model = $this->owner;
             $model->access_language          = $this->defaultDomain;
@@ -232,7 +233,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
 
 
     /**
-     *Creates a CDbCriteria with restrics read access by meta data settings
+     *Creates a CDbCriteria with restrics read access
      * @return \CDbCriteria
      */
     private function createAccessCriteria($type)
@@ -241,13 +242,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
 
         // do not apply filter for superuser
         if (!Yii::app()->user->checkAccess($this->superuserRole)) {
-            if ($this->owner->metaDataRelation != "_self_") {
-                $criteria->with = $this->owner->metaDataRelation;
-                $tablePrefix    = $this->owner->metaDataRelation;
-            } else {
-                $tablePrefix = $this->owner->getTableAlias();
-            }
-
+            $tablePrefix = $this->owner->getTableAlias();
             $checkAccessRoles = "";
             if (!Yii::app()->user->isGuest) {
                 foreach (Yii::app()->authManager->getRoles(Yii::app()->user->id) AS $role) {
