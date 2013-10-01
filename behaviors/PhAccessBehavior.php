@@ -33,6 +33,22 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public $superuserRole = self::SUPERUSER_ROLE;
 
+    static public function getAccessOwners()
+    {
+        throw new CException('Method getAccessOwners is not implemented yet!');
+    }
+
+    static public function getAccessDomains()
+    {
+        return CMap::mergeArray(array(self::ALL_DOMAINS => self::ALL_DOMAINS), Yii::app()->params['languages']);
+    }
+
+    static public function getAccessRoles()
+    {
+        $roles = Yii::app()->authManager->getRoles(Yii::app()->user->id);
+        return array_combine(array_keys($roles), array_keys($roles));
+    }
+
     /**
      * Named scope for records the user can read
      * @return mixed
