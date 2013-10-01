@@ -171,6 +171,40 @@ class PhAccessBehavior extends CActiveRecordBehavior
         return true;
     }
 
+
+    public function beforeValidate($event)
+    {
+        parent::beforeValidate($event);
+        // running in console app - no automatic saving
+        if (Yii::app() instanceof CConsoleApplication) {
+            Yii::log('PhAccessBehavior assumes user.id:1 with no primary role.', CLogger::LEVEL_INFO);
+            $userId      = 1;
+            $primaryRole = null;
+        } else {
+            $userId       = Yii::app()->user->id;
+            $defaultRoles = $this->resolveDefaultRoles();
+        }
+
+        if (isset($this->owner->access_domain)) {
+            if ($this->defaultDomain === self::APP_LANGUAGE) {
+                $this->defaultDomain = Yii::app()->language;
+            }
+            if (!$this->owner->access_domain) {
+                $this->owner->access_domain = $this->defaultDomain;
+            }
+        }
+
+        // TODO create new record or just update modifiedBy/At columns
+        if ($this->owner->isNewRecord) {
+            $model = $this->owner;
+            if (!$model->access_owner) {
+                $model->access_owner = $userId;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Checks if the user has update permissions for the current record
      *
@@ -197,36 +231,6 @@ class PhAccessBehavior extends CActiveRecordBehavior
                 return false;
             }
         }
-
-
-        // running in console app - no automatic saving
-        if (Yii::app() instanceof CConsoleApplication) {
-            Yii::log('PhAccessBehavior assumes user.id:1 with no primary role.', CLogger::LEVEL_INFO);
-            $userId      = 1;
-            $primaryRole = null;
-        } else {
-            $userId       = Yii::app()->user->id;
-            $defaultRoles = $this->resolveDefaultRoles();
-        }
-
-        if ($this->defaultDomain === self::APP_LANGUAGE) {
-            $this->defaultDomain = Yii::app()->language;
-        }
-
-        if (!$this->owner->access_domain) {
-            $this->owner->access_domain = $this->defaultDomain;
-        }
-
-        // TODO create new record or just update modifiedBy/At columns
-        /*if ($this->owner->isNewRecord) {
-            $model = $this->owner;
-            $model->access_language          = $this->defaultDomain;
-            $model->access_owner             = $userId;
-            $model->access_update = $defaultRoles['defaultRoleUpdate']; // set, when a user has associated data array('defaultRoleUpdate'=>true) in an assignment.
-            $model->access_delete = $defaultRoles['defaultRoleDelete'];
-            $model->access_create = $defaultRoles['defaultRoleCreate'];
-            $model->access_read   = $defaultRoles['defaultRoleRead'];
-        }*/
 
         return true;
     }
