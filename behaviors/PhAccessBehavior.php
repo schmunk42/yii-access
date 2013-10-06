@@ -50,6 +50,43 @@ class PhAccessBehavior extends CActiveRecordBehavior
     }
 
     /**
+     * Whether an record can be appended to this record by the current user
+     * @return boolean
+     */
+    public function getIsAppendable()
+    {
+        return ($this->owner->access_append === null)?true:Yii::app()->user->checkAccess($this->owner->access_append);
+    }
+
+    /**
+     * Whether the record can be read by the current user
+     * @return boolean
+     */
+    public function getIsReadable()
+    {
+        return ($this->owner->access_read === null)?true:Yii::app()->user->checkAccess($this->owner->access_read);
+    }
+
+
+    /**
+     * Whether the record can be updated by the current user
+     * @return boolean
+     */
+    public function getIsUpdateable()
+    {
+        return ($this->owner->access_update === null)?true:Yii::app()->user->checkAccess($this->owner->access_update);
+    }
+
+    /**
+     * Whether the record can be deleted by the current user
+     * @return boolean
+     */
+    public function getIsDeleteable()
+    {
+        return ($this->owner->access_delete === null)?true:Yii::app()->user->checkAccess($this->owner->access_delete);
+    }
+
+    /**
      * Named scope for records the user can read
      * @return mixed
      */
@@ -89,42 +126,6 @@ class PhAccessBehavior extends CActiveRecordBehavior
         return $this->Owner;
     }
 
-    /**
-     * Whether an record can be appended to this record by the current user
-     * @return boolean
-     */
-    public function isAppendable()
-    {
-        return Yii::app()->user->checkAccess($this->owner->access_create);
-    }
-
-    /**
-     * Whether the record can be read by the current user
-     * @return boolean
-     */
-    public function isReadable()
-    {
-        return Yii::app()->user->checkAccess($this->owner->access_read);
-    }
-
-
-    /**
-     * Whether the record can be updated by the current user
-     * @return boolean
-     */
-    public function isUpdateable()
-    {
-        return Yii::app()->user->checkAccess($this->owner->access_update);
-    }
-
-    /**
-     * Whether the record can be deleted by the current user
-     * @return boolean
-     */
-    public function isDeleteable()
-    {
-        return Yii::app()->user->checkAccess($this->owner->access_delete);
-    }
 
     /**
      * Named scope for records in a specific language
