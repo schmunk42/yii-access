@@ -40,14 +40,23 @@ class PhAccessBehavior extends CActiveRecordBehavior
 
     static public function getAccessDomains()
     {
-        $languages = (Yii::app()->params['languages'])?Yii::app()->params['languages']:array();
+        $languages = (Yii::app()->params['languages']) ? Yii::app()->params['languages'] :
+            array(Yii::app()->language => Yii::app()->language);
         return CMap::mergeArray(array(self::ALL_DOMAINS => self::ALL_DOMAINS), $languages);
     }
 
     static public function getAccessRoles()
     {
-        $roles = Yii::app()->authManager->getRoles(Yii::app()->user->id);
-        return array_combine(array_keys($roles), array_keys($roles));
+        $return = array();
+        if (!(Yii::app() instanceof CConsoleApplication)) {
+            $roles = Yii::app()->authManager->getRoles();
+            foreach ($roles AS $role => $authItem) {
+                if (Yii::app()->user->checkAccess($role)) {
+                    $return[$role] = $role;
+                }
+            }
+        }
+        return $return;
     }
 
     /**
