@@ -33,6 +33,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public $superuserRole = self::SUPERUSER_ROLE;
 
+    private $_oldAttributes;
+
     static public function getAccessOwners()
     {
         throw new CException('Method getAccessOwners is not implemented yet!');
@@ -167,6 +169,12 @@ class PhAccessBehavior extends CActiveRecordBehavior
         return $this->Owner;
     }
 
+    public function afterFind($event)
+    {
+        $this->_oldAttributes = $this->owner->attributes;
+        return parent::afterFind($event);
+    }
+
     /**
      * Checks if the user has delete permissions for the current record
      *
@@ -177,7 +185,10 @@ class PhAccessBehavior extends CActiveRecordBehavior
     public function beforeDelete($event)
     {
         parent::beforeDelete($event);
-        if ($this->owner->access_delete && Yii::app()->user->checkAccess($this->owner->access_delete) === false) {
+        if ($this->_oldAttributes['access_delete'] && Yii::app()->user->checkAccess(
+                                                                      $this->_oldAttributes['access_delete']
+            ) === false
+        ) {
             throw new CHttpException(403, "You are not authorized to delete this record.");
             return false;
         } else {
@@ -254,13 +265,23 @@ class PhAccessBehavior extends CActiveRecordBehavior
 
         // TODO - implement parent create check
         // on update check permission with record from database - not the modified one
-        $checkAccess = $this->owner->access_update;
-        if ($checkAccess = $this->owner->access_update) {
-            if (Yii::app()->user->checkAccess($checkAccess) === false) {
-                throw new CHttpException(403, "You are not authorized to update this record.");
-                return false;
+        $checkAccess = $this->_oldAttributes['access_update'];
+        if ($checkAccess && Yii::app()->user->checkAccess($checkAccess) === false) {
+            throw new CHttpException(403, "You are not authorized to update this record.");
+            return false;
+        }
+
+        if ($this->owner->hasAttribute('access_append')) {
+            $parent = $this->owner->findByPk($this->owner->tree_parent_id);
+            if ($parent !== null) {
+                $checkAccess = $parent->access_append;
+                if ($checkAccess && Yii::app()->user->checkAccess($checkAccess) === false) {
+                    throw new CHttpException(403, "You are not authorized to append this record to #{$this->owner->tree_parent_id}.");
+                    return false;
+                }
             }
         }
+
 
         return true;
     }
