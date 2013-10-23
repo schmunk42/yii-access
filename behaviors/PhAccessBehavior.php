@@ -65,7 +65,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function getIsAppendable()
     {
-        return ($this->owner->access_append === null)?true:Yii::app()->user->checkAccess($this->owner->access_append);
+        return ($this->owner->access_append === null) ? true :
+            Yii::app()->user->checkAccess($this->owner->access_append);
     }
 
     /**
@@ -74,7 +75,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function getIsReadable()
     {
-        return ($this->owner->access_read === null)?true:Yii::app()->user->checkAccess($this->owner->access_read);
+        return ($this->owner->access_read === null) ? true : Yii::app()->user->checkAccess($this->owner->access_read);
     }
 
 
@@ -84,7 +85,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function getIsUpdateable()
     {
-        return ($this->owner->access_update === null)?true:Yii::app()->user->checkAccess($this->owner->access_update);
+        return ($this->owner->access_update === null) ? true :
+            Yii::app()->user->checkAccess($this->owner->access_update);
     }
 
     /**
@@ -93,7 +95,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
      */
     public function getIsDeleteable()
     {
-        return ($this->owner->access_delete === null)?true:Yii::app()->user->checkAccess($this->owner->access_delete);
+        return ($this->owner->access_delete === null) ? true :
+            Yii::app()->user->checkAccess($this->owner->access_delete);
     }
 
     /**
@@ -156,10 +159,10 @@ class PhAccessBehavior extends CActiveRecordBehavior
         }
 
         $this->Owner->getDbCriteria()->mergeWith(
-            array(
-                 'condition' => $condition,
-                 'params'    => array(':language' => $language)
-            )
+                    array(
+                         'condition' => $condition,
+                         'params'    => array(':language' => $language)
+                    )
         );
         return $this->Owner;
     }
@@ -192,8 +195,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
     public function afterDelete($event)
     {
         Yii::app()->setGlobalState(
-            'p3extensions.behaviors.PhAccessBehavior:lastDelete:' . $this->owner->tableSchema->name,
-            microtime(true)
+           'p3extensions.behaviors.PhAccessBehavior:lastDelete:' . $this->owner->tableSchema->name,
+               microtime(true)
         );
         return true;
     }
@@ -273,7 +276,7 @@ class PhAccessBehavior extends CActiveRecordBehavior
 
         // do not apply filter for superuser
         if (!Yii::app()->user->checkAccess($this->superuserRole)) {
-            $tablePrefix = $this->owner->getTableAlias();
+            $tablePrefix      = $this->owner->getTableAlias();
             $checkAccessRoles = "";
             if (!Yii::app()->user->isGuest) {
                 foreach (Yii::app()->authManager->getRoles(Yii::app()->user->id) AS $role) {
