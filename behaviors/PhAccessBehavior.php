@@ -47,6 +47,9 @@ class PhAccessBehavior extends CActiveRecordBehavior
         return CMap::mergeArray(array(self::ALL_DOMAINS => self::ALL_DOMAINS), $languages);
     }
 
+    /**
+     * @return array returns all roles for the user, including children of auth assignments
+     */
     static public function getAccessRoles()
     {
         $return = array();
@@ -300,8 +303,8 @@ class PhAccessBehavior extends CActiveRecordBehavior
             $tablePrefix      = $this->owner->getTableAlias();
             $checkAccessRoles = "";
             if (!Yii::app()->user->isGuest) {
-                foreach (Yii::app()->authManager->getRoles(Yii::app()->user->id) AS $role) {
-                    $checkAccessRoles .= $tablePrefix . "." . $type . " = '" . $role->name . "' OR ";
+                foreach (self::getAccessRoles() AS $role) {
+                    $checkAccessRoles .= $tablePrefix . "." . $type . " = '" . $role . "' OR ";
                 }
             } else {
                 $checkAccessRoles .= $tablePrefix . "." . $type . " = 'Guest' OR ";
